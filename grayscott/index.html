@@ -85,33 +85,31 @@
             uniform vec4 color3;
             uniform vec4 color4;
             uniform vec4 color5;
+            vec2 texel = vec2(1.0 / screenWidth, 1.0 / screenHeight);
 
-            vec2 texel = vec2(1.0/screenWidth, 1.0/screenHeight);
+            vec3 interpColor(vec4 firstColor, vec4 secondColor, float value) {
+                float fraction = (value - firstColor.a) / (secondColor.a - firstColor.a);
+                return mix(firstColor.rgb, secondColor.rgb, fraction);
+            }
 
             void main() {
                 float value = texture2D(tSource, vUv).g;
-                // float fraction = fract(value);
-                float fraction;
                 vec3 col;
 
                 if (value <= color1.a) {
                     col = color1.rgb;
                 }
                 else if (value > color1.a && value <= color2.a) {
-                    fraction = (value - color1.a) / (color2.a - color1.a);
-                    col = mix(color1.rgb, color2.rgb, fraction);
+                    col = interpColor(color1, color2, value);
                 }
                 else if (value > color2.a && value <= color3.a) {
-                    fraction = (value - color2.a) / (color3.a - color2.a);
-                    col = mix(color2.rgb, color3.rgb, fraction);
+                    col = interpColor(color2, color3, value);
                 }
                 else if (value > color3.a && value <= color4.a) {
-                    fraction = (value - color3.a) / (color4.a - color3.a);
-                    col = mix(color3.rgb, color4.rgb, fraction);
+                    col = interpColor(color3, color4, value);
                 }
                 else if (value > color4.a && value <= color5.a) {
-                    fraction = (value - color4.a) / (color5.a - color4.a);
-                    col = mix(color4.rgb, color5.rgb, fraction);
+                    col = interpColor(color4, color5, value);
                 }
                 else if (value > color5.a) {
                     col = color5.rgb;
