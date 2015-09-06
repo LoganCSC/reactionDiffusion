@@ -144,7 +144,7 @@
 
                 document.getElementById("gradient").onselectstart = function () {return false;};
 
-                init();
+                grayScott.init();
             });
         </script>
     </head>
@@ -184,7 +184,7 @@
                 <p style="text-align:center">
                     <button id="btn_clear" onclick="clean()">Clear</button>
                     <button id="btn_snapshot" onclick="snapshot()">Take snapshot</button>
-                    <button id="btn_fullscreen" onclick="fullscreen()">Fullscreen mode</button>
+                    <button id="btn_fullscreen" onclick="grayScott.fullscreen()">Fullscreen mode</button>
                 </p>
                 <h4 class="unsafe">Advanced settings</h4>
                 Feed rate:
