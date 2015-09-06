@@ -298,28 +298,26 @@ var grayScott = (function(module){
         $("#sld_numStepsPerFrame").slider("value", preset.numStepsPerFrame);
     }
 
+    var addSlider = function(name, presetKey, min, max, step) {
+
+        var slider = $("#sld_" + name);
+        var handler = function(event, ui) {
+            $("#" + name).html(ui.value); preset[presetKey] = ui.value; updateShareString();
+        }
+        slider.slider({
+            value: preset[presetKey], min: min, max: max, step: step,
+            change: handler,
+            slide: handler
+        });
+        slider.slider("value", preset[presetKey]);
+    }
+
     var initControls = function() {
         initPresetDropDown();
-        $("#sld_replenishment").slider({
-            value: preset.feed, min: 0, max:0.1, step:0.001,
-            change: function(event, ui) {$("#replenishment").html(ui.value); preset.feed = ui.value; updateShareString();},
-            slide: function(event, ui) {$("#replenishment").html(ui.value); preset.feed = ui.value; updateShareString();}
-        });
-        $("#sld_replenishment").slider("value", preset.feed);
 
-        $("#sld_diminishment").slider({
-            value: preset.kill, min: 0, max:0.073, step:0.001,
-            change: function(event, ui) {$("#diminishment").html(ui.value); preset.kill = ui.value; updateShareString();},
-            slide: function(event, ui) {$("#diminishment").html(ui.value); preset.kill = ui.value; updateShareString();}
-        });
-        $("#sld_diminishment").slider("value", preset.kill);
-
-        $("#sld_numStepsPerFrame").slider({
-            value: preset.numStepsPerFrame, min: 1, max:500, step:1,
-            change: function(event, ui) {$("#numStepsPerFrame").html(ui.value); preset.numStepsPerFrame = ui.value; updateShareString();},
-            slide: function(event, ui) {$("#numStepsPerFrame").html(ui.value); preset.numStepsPerFrame = ui.value; updateShareString();}
-        });
-        $("#sld_numStepsPerFrame").slider("value", preset.numStepsPerFrame);
+        addSlider("replenishment", "feed", 0, 0.1, 0.001);
+        addSlider("diminishment", "kill", 0, 0.073, 0.001);
+        addSlider("numStepsPerFrame", "numStepsPerFrame", 1, 400, 1);
 
         $('#share').keypress(function (e) {
             if (e.which == 13) {
