@@ -24,6 +24,7 @@
             }
         </script>
         <script type="x-shader/x-fragment" id="gsFragmentShader">
+            // this is OGSL (https://www.opengl.org/documentation/glsl/) not javascript!
             varying vec2 vUv;
             uniform float screenWidth;
             uniform float screenHeight;
@@ -31,10 +32,9 @@
             uniform float delta;
             uniform float feed;
             uniform float kill;
-            uniform vec2 brush;
-            // these can be parameters
-            const float DU = 0.2; //0.2097;
-            const float DV = 0.1; //0.105;
+            uniform float DU;
+            uniform float DV;
+            uniform vec2 brush;;
 
             vec2 texel = vec2(1.0/screenWidth, 1.0/screenHeight);
             float step_x = 1.0/screenWidth;
@@ -180,6 +180,14 @@
                 Death rate:
                 <span class ="remark" id="diminishment"></span><br/>
                 <div id="sld_diminishment" class="slider"></div>
+
+                DU:
+                <span class ="remark" id="DU"></span><br/>
+                <div id="sld_DU" class="slider"></div>
+
+                DV:
+                <span class ="remark" id="DV"></span><br/>
+                <div id="sld_DV" class="slider"></div>
 
                 Num steps / frame:
                 <span class ="remark" id="numStepsPerFrame"></span><br/>

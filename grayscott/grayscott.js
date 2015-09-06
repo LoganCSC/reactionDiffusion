@@ -61,6 +61,8 @@ var grayScott = (function(module){
             delta: {type: "f", value: 1.0},
             feed: {type: "f", value: preset.feed},
             kill: {type: "f", value: preset.kill},
+            DU: {type: "f", value: preset.DU},
+            DV: {type: "f", value: preset.DV},
             brush: {type: "v2", value: new THREE.Vector2(-10, -10)},
             color1: {type: "v4", value: new THREE.Vector4(0, 0, 0.0, 0)},
             color2: {type: "v4", value: new THREE.Vector4(0, 1, 0, 0.2)},
@@ -201,8 +203,7 @@ var grayScott = (function(module){
 
         mScreenQuad.material = mGSMaterial;
         mUniforms.delta.value = dt;
-        mUniforms.feed.value = preset.feed;
-        mUniforms.kill.value = preset.kill;
+        updateUniformsPresets(mUniforms);
 
         for (var i = 0; i < preset.numStepsPerFrame; ++i) {
             if (!mToggled) {
@@ -229,6 +230,13 @@ var grayScott = (function(module){
         numFrames++;
 
         requestAnimationFrame(render);
+    }
+
+    var updateUniformsPresets = function(mUniforms) {
+        mUniforms.feed.value = preset.feed;
+        mUniforms.kill.value = preset.kill;
+        mUniforms.DU.value = preset.DU;
+        mUniforms.DV.value = preset.DV;
     }
 
     var updateUniformsColors = function() {
@@ -317,6 +325,8 @@ var grayScott = (function(module){
 
         addSlider("replenishment", "feed", 0, 0.1, 0.001);
         addSlider("diminishment", "kill", 0, 0.073, 0.001);
+        addSlider("DU", "DU", 0.001, 0.2, 0.001);
+        addSlider("DV", "DV", 0.001, 0.1, 0.001);
         addSlider("numStepsPerFrame", "numStepsPerFrame", 1, 400, 1);
 
         $('#share').keypress(function (e) {
