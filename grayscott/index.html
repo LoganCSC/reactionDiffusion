@@ -11,6 +11,10 @@
         <script type="text/javascript" src="../3rd/three-71.5.min.js"></script>
         <script type="text/javascript" src="../gradientui/gradientui.js"></script>
         <!--script type="text/javascript" src="http://mrdoob.github.com/three.js/build/three.min.js"></script-->
+
+        <script type="text/javascript" src="grayscott.js"></script>
+        <script type="text/javascript" src="presets.js"></script>
+
         <script type="x-shader/x-vertex" id="standardVertexShader">
             varying vec2 vUv;
 
@@ -117,7 +121,7 @@
                 gl_FragColor = vec4(col.r, col.g, col.b, 1.0);
             }
         </script>
-        <script type="text/javascript" src="grayscott.js"></script>
+
         <meta charset="UTF-8">
         <style>
             #gradient{
@@ -165,28 +169,13 @@
             <section id="controls">
                 <form name="ex">
                     Presets:
-                    <select name="scene" style="width:100%"
-                        onchange="loadPreset(document.ex.scene.selectedIndex)">
-                        <option value="0" selected="selected">Default</option>
-                        <option value="1">Solitons</option>
-                        <option value="2">Pulsating solitons</option>
-                        <option value="3">Worms</option>
-                        <option value="4">Mazes</option>
-                        <option value="5">Holes</option>
-                        <option value="6">Chaos</option>
-                        <option value="7">Chaos and holes</option>
-                        <option value="8">Moving spots</option>
-                        <option value="9">Spots and loops</option>
-                        <option value="10">Waves</option>
-                        <option value="11">The U-Skate world</option>
-                    </select>
+                    <select id="presetDropdown" name="scene" style="width:100%"></select>
                 </form>
                 <p style="text-align:center">
                     <button id="btn_clear" onclick="clean()">Clear</button>
                     <button id="btn_snapshot" onclick="snapshot()">Take snapshot</button>
                     <button id="btn_fullscreen" onclick="grayScott.fullscreen()">Fullscreen mode</button>
                 </p>
-                <h4 class="unsafe">Advanced settings</h4>
                 Feed rate:
                 <span class="remark" id="replenishment"></span><br/>
                 <div id="sld_replenishment" class="slider"></div>

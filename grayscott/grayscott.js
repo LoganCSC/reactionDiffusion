@@ -1,16 +1,13 @@
 /*
- * Gray-Scott
- *
  * A solver of the Gray-Scott model of reaction diffusion.
  *
  * ©2012 pmneila.
  * p.mneila at upm.es
+ * modified by Barry Becker
  */
-
 var grayScott = (function(module){
 
-    // Canvas.
-    var canvas;
+    var canvas;  // HTML5 Canvas element
     var canvasQ;
     var canvasWidth;
     var canvasHeight;
@@ -31,68 +28,14 @@ var grayScott = (function(module){
     var mScreenQuad;
 
     var mToggled = false;
-
     var mMinusOnes = new THREE.Vector2(-1, -1);
-
-    // Some presets.
-    var presets = [
-        { // Default
-            feed: 0.037,
-            kill: 0.06
-        },
-        { // Solitons
-            feed: 0.03,
-            kill: 0.062
-        },
-        { // Pulsating solitons
-            feed: 0.025,
-            kill: 0.06
-        },
-        { // Worms.
-            feed: 0.078,
-            kill: 0.061
-        },
-        { // Mazes
-            feed: 0.029,
-            kill: 0.057
-        },
-        { // Holes
-            feed: 0.039,
-            kill: 0.058
-        },
-        { // Chaos
-            feed: 0.026,
-            kill: 0.051
-        },
-        { // Chaos and holes (by clem)
-            feed: 0.034,
-            kill: 0.056
-        },
-        { // Moving spots.
-            feed: 0.014,
-            kill: 0.054
-        },
-        { // Spots and loops.
-            feed: 0.018,
-            kill: 0.051
-        },
-        { // Waves
-            feed: 0.014,
-            kill: 0.045
-        },
-        { // The U-Skate World
-            feed: 0.062,
-            kill: 0.06093
-        }
-    ];
-
-    // Configuration.
-    var feed = presets[0].feed;
-    var kill = presets[0].kill;
+    var preset; // parameter configuration
 
     /** initialization of grayScott module */
     module.init = function() {
+        preset = module.getDefaultPreset();
         init_controls();
+        createFullScreenBinding();
 
         canvasQ = $('#myCanvas');
         canvas = canvasQ.get(0);
@@ -113,8 +56,8 @@ var grayScott = (function(module){
             screenHeight: {type: "f", value: undefined},
             tSource: {type: "t", value: undefined},
             delta: {type: "f", value: 1.0},
-            feed: {type: "f", value: feed},
-            kill: {type: "f", value: kill},
+            feed: {type: "f", value: preset.feed},
+            kill: {type: "f", value: preset.kill},
             brush: {type: "v2", value: new THREE.Vector2(-10, -10)},
             color1: {type: "v4", value: new THREE.Vector4(0, 0, 0.0, 0)},
             color2: {type: "v4", value: new THREE.Vector4(0, 1, 0, 0.2)},
@@ -150,123 +93,9 @@ var grayScott = (function(module){
         requestAnimationFrame(render);
     }
 
-    var resize = function(width, height) {
-        // Set the new shape of canvas.
-        canvasQ.width(width);
-        canvasQ.height(height);
-
-        // Get the real size of canvas.
-        canvasWidth = canvasQ.width();
-        canvasHeight = canvasQ.height();
-
-        mRenderer.setSize(canvasWidth, canvasHeight);
-
-        // TODO: Possible memory leak?
-        mTexture1 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
-                            {minFilter: THREE.LinearFilter,
-                             magFilter: THREE.LinearFilter,
-                             format: THREE.RGBFormat,
-                             type: THREE.FloatType});
-        mTexture2 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
-                            {minFilter: THREE.LinearFilter,
-                             magFilter: THREE.LinearFilter,
-                             format: THREE.RGBFormat,
-                             type: THREE.FloatType});
-        mTexture1.wrapS = THREE.RepeatWrapping;
-        mTexture1.wrapT = THREE.RepeatWrapping;
-        mTexture2.wrapS = THREE.RepeatWrapping;
-        mTexture2.wrapT = THREE.RepeatWrapping;
-
-        mUniforms.screenWidth.value = canvasWidth/2;
-        mUniforms.screenHeight.value = canvasHeight/2;
-    }
-
-    var render = function(time) {
-        var dt = (time - mLastTime)/20.0;
-        if(dt > 0.8 || dt<=0)
-            dt = 0.8;
-        mLastTime = time;
-
-        mScreenQuad.material = mGSMaterial;
-        mUniforms.delta.value = dt;
-        mUniforms.feed.value = feed;
-        mUniforms.kill.value = kill;
-
-        for (var i=0; i<8; ++i) {
-            if (!mToggled) {
-                mUniforms.tSource.value = mTexture1;
-                mRenderer.render(mScene, mCamera, mTexture2, true);
-                mUniforms.tSource.value = mTexture2;
-            }
-            else {
-                mUniforms.tSource.value = mTexture2;
-                mRenderer.render(mScene, mCamera, mTexture1, true);
-                mUniforms.tSource.value = mTexture1;
-            }
-
-            mToggled = !mToggled;
-            mUniforms.brush.value = mMinusOnes;
-        }
-
-        if(mColorsNeedUpdate)
-            updateUniformsColors();
-
-        mScreenQuad.material = mScreenMaterial;
-        mRenderer.render(mScene, mCamera);
-
-        requestAnimationFrame(render);
-    }
-
-    loadPreset = function(idx) {
-        feed = presets[idx].feed;
-        kill = presets[idx].kill;
+    module.loadPreset = function(idx) {
+        preset = grayScott.getPreset(idx);
         worldToForm();
-    }
-
-    var updateUniformsColors = function() {
-        var values = $("#gradient").gradient("getValuesRGBS");
-        for (var i=0; i<values.length; i++) {
-            var v = values[i];
-            mColors[i].value = new THREE.Vector4(v[0], v[1], v[2], v[3]);
-        }
-
-        mColorsNeedUpdate = false;
-    }
-
-    var onUpdatedColor = function() {
-        mColorsNeedUpdate = true;
-        updateShareString();
-    }
-
-    var onMouseMove = function(e) {
-        var ev = e ? e : window.event;
-
-        mMouseX = ev.pageX - canvasQ.offset().left; // these offsets work with
-        mMouseY = ev.pageY - canvasQ.offset().top; //  scrolled documents too
-
-        if(mMouseDown)  {
-            mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
-        }
-    }
-
-    var onMouseDown = function(e) {
-        var ev = e ? e : window.event;
-        mMouseDown = true;
-
-        mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
-    }
-
-    var onMouseUp = function(e) {
-        mMouseDown = false;
-    }
-
-    clean = function() {
-        mUniforms.brush.value = new THREE.Vector2(-10, -10);
-    }
-
-    snapshot = function() {
-        var dataURL = canvas.toDataURL("image/png");
-        window.open(dataURL, "name-"+Math.random());
     }
 
     /**
@@ -313,37 +142,154 @@ var grayScott = (function(module){
         }
     }
 
+    var resize = function(width, height) {
+        // Set the new shape of canvas.
+        canvasQ.width(width);
+        canvasQ.height(height);
+
+        // Get the real size of canvas.
+        canvasWidth = canvasQ.width();
+        canvasHeight = canvasQ.height();
+
+        mRenderer.setSize(canvasWidth, canvasHeight);
+
+        // TODO: Possible memory leak?
+        mTexture1 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
+                            {minFilter: THREE.LinearFilter,
+                             magFilter: THREE.LinearFilter,
+                             format: THREE.RGBFormat,
+                             type: THREE.FloatType});
+        mTexture2 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
+                            {minFilter: THREE.LinearFilter,
+                             magFilter: THREE.LinearFilter,
+                             format: THREE.RGBFormat,
+                             type: THREE.FloatType});
+        mTexture1.wrapS = THREE.RepeatWrapping;
+        mTexture1.wrapT = THREE.RepeatWrapping;
+        mTexture2.wrapS = THREE.RepeatWrapping;
+        mTexture2.wrapT = THREE.RepeatWrapping;
+
+        mUniforms.screenWidth.value = canvasWidth/2;
+        mUniforms.screenHeight.value = canvasHeight/2;
+    }
+
+    var render = function(time) {
+        var dt = (time - mLastTime)/20.0;
+        if(dt > 0.8 || dt<=0)
+            dt = 0.8;
+        mLastTime = time;
+
+        mScreenQuad.material = mGSMaterial;
+        mUniforms.delta.value = dt;
+        mUniforms.feed.value = preset.feed;
+        mUniforms.kill.value = preset.kill;
+
+        for (var i=0; i<8; ++i) {
+            if (!mToggled) {
+                mUniforms.tSource.value = mTexture1;
+                mRenderer.render(mScene, mCamera, mTexture2, true);
+                mUniforms.tSource.value = mTexture2;
+            }
+            else {
+                mUniforms.tSource.value = mTexture2;
+                mRenderer.render(mScene, mCamera, mTexture1, true);
+                mUniforms.tSource.value = mTexture1;
+            }
+
+            mToggled = !mToggled;
+            mUniforms.brush.value = mMinusOnes;
+        }
+
+        if(mColorsNeedUpdate)
+            updateUniformsColors();
+
+        mScreenQuad.material = mScreenMaterial;
+        mRenderer.render(mScene, mCamera);
+
+        requestAnimationFrame(render);
+    }
+
+    var updateUniformsColors = function() {
+        var values = $("#gradient").gradient("getValuesRGBS");
+        for (var i=0; i<values.length; i++) {
+            var v = values[i];
+            mColors[i].value = new THREE.Vector4(v[0], v[1], v[2], v[3]);
+        }
+
+        mColorsNeedUpdate = false;
+    }
+
+    var onUpdatedColor = function() {
+        mColorsNeedUpdate = true;
+        updateShareString();
+    }
+
+    var onMouseMove = function(e) {
+        var ev = e ? e : window.event;
+
+        mMouseX = ev.pageX - canvasQ.offset().left; // these offsets work with
+        mMouseY = ev.pageY - canvasQ.offset().top; //  scrolled documents too
+
+        if(mMouseDown)  {
+            mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
+        }
+    }
+
+    var onMouseDown = function(e) {
+        var ev = e ? e : window.event;
+        mMouseDown = true;
+
+        mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
+    }
+
+    var onMouseUp = function(e) {
+        mMouseDown = false;
+    }
+
+    var clean = function() {
+        mUniforms.brush.value = new THREE.Vector2(-10, -10);
+    }
+
+    var snapshot = function() {
+        var dataURL = canvas.toDataURL("image/png");
+        window.open(dataURL, "name-"+Math.random());
+    }
+
     var isFullscreen = function() {
         return document.mozFullScreenElement ||
             document.webkitCurrentFullScreenElement ||
             document.fullscreenElement;
     }
 
-    $(document).bind('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(ev) {
-        // restore old canvas size
-        if(!isFullscreen())
-            resize(window.oldCanvSize.width, window.oldCanvSize.height);
-    });
+    var createFullScreenBinding = function() {
+        $(document).bind('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(ev) {
+            // restore old canvas size
+            if (!isFullscreen()) {
+                resize(window.oldCanvSize.width, window.oldCanvSize.height);
+            }
+        });
+    }
 
     var worldToForm = function() {
         //document.ex.sldReplenishment.value = feed * 1000;
-        $("#sld_replenishment").slider("value", feed);
-        $("#sld_diminishment").slider("value", kill);
+        $("#sld_replenishment").slider("value", preset.feed);
+        $("#sld_diminishment").slider("value", preset.kill);
     }
 
     var init_controls = function() {
+        initPresetDropDown();
         $("#sld_replenishment").slider({
-            value: feed, min: 0, max:0.1, step:0.001,
-            change: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value; updateShareString();},
-            slide: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value; updateShareString();}
+            value: preset.feed, min: 0, max:0.1, step:0.001,
+            change: function(event, ui) {$("#replenishment").html(ui.value); preset.feed = ui.value; updateShareString();},
+            slide: function(event, ui) {$("#replenishment").html(ui.value); preset.feed = ui.value; updateShareString();}
         });
-        $("#sld_replenishment").slider("value", feed);
+        $("#sld_replenishment").slider("value", preset.feed);
         $("#sld_diminishment").slider({
-            value: kill, min: 0, max:0.073, step:0.001,
-            change: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value; updateShareString();},
-            slide: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value; updateShareString();}
+            value: preset.kill, min: 0, max:0.073, step:0.001,
+            change: function(event, ui) {$("#diminishment").html(ui.value); preset.kill = ui.value; updateShareString();},
+            slide: function(event, ui) {$("#diminishment").html(ui.value); preset.kill = ui.value; updateShareString();}
         });
-        $("#sld_diminishment").slider("value", kill);
+        $("#sld_diminishment").slider("value", preset.kill);
 
         $('#share').keypress(function (e) {
             if (e.which == 13) {
@@ -373,12 +319,23 @@ var grayScott = (function(module){
         });
     }
 
-    alertInvalidShareString = function() {
+    var initPresetDropDown = function() {
+        var presetCombo = $("#presetDropdown");
+        presetCombo.on("change", function() {
+            grayScott.loadPreset(this.selectedIndex);
+        });
+
+        $.each(grayScott.getPresetNames(), function(i, name) {
+            presetCombo.append("<option value='" + i + "'>" + name + "</option>");
+        });
+    }
+
+    var alertInvalidShareString = function() {
         $("#share").val("Invalid string!");
         setTimeout(updateShareString, 1000);
     }
 
-    parseShareString = function() {
+    var parseShareString = function() {
         var str = $("#share").val();
         var fields = str.split(",");
 
@@ -414,13 +371,13 @@ var grayScott = (function(module){
         }
 
         $("#gradient").gradient("setValues", newValues);
-        feed = newFeed;
-        kill = newKill;
+        preset.feed = newFeed;
+        preset.kill = newKill;
         worldToForm();
     }
 
-    updateShareString = function() {
-        var str = "".concat(feed, ",", kill);
+    var updateShareString = function() {
+        var str = "".concat(preset.feed, ",", preset.kill);
 
         var values = $("#gradient").gradient("getValues");
         for(var i=0; i<values.length; i++) {
