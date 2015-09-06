@@ -1,11 +1,9 @@
 
-.gradient-view
-{
+.gradient-view {
     border: 1px solid;
 }
 
-.gradient-dragger
-{
+.gradient-dragger {
     border: 1px solid;
     width: 7px;
     height: 8px;

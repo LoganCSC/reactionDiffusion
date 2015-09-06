@@ -2,8 +2,8 @@
 body {
     font-family:sans-serif;
     background:#333333;
-    color:#777777;
-    width: 1200px;
+    color:#889988;
+    width: 100%; //1200px;
     margin: 0 auto;
 }
 

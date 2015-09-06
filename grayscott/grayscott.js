@@ -1,4 +1,4 @@
-/* 
+/*
  * Gray-Scott
  *
  * A solver of the Gray-Scott model of reaction diffusion.
@@ -37,8 +37,6 @@ var mMinusOnes = new THREE.Vector2(-1, -1);
 // Some presets.
 var presets = [
     { // Default
-        //feed: 0.018,
-        //kill: 0.051
         feed: 0.037,
         kill: 0.06
     },
@@ -92,24 +90,23 @@ var presets = [
 var feed = presets[0].feed;
 var kill = presets[0].kill;
 
-init = function()
-{
+init = function() {
     init_controls();
-    
+
     canvasQ = $('#myCanvas');
     canvas = canvasQ.get(0);
-    
+
     canvas.onmousedown = onMouseDown;
     canvas.onmouseup = onMouseUp;
     canvas.onmousemove = onMouseMove;
-    
+
     mRenderer = new THREE.WebGLRenderer({canvas: canvas, preserveDrawingBuffer: true});
 
     mScene = new THREE.Scene();
     mCamera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, -10000, 10000);
     mCamera.position.z = 100;
     mScene.add(mCamera);
-    
+
     mUniforms = {
         screenWidth: {type: "f", value: undefined},
         screenHeight: {type: "f", value: undefined},
@@ -126,7 +123,7 @@ init = function()
     };
     mColors = [mUniforms.color1, mUniforms.color2, mUniforms.color3, mUniforms.color4, mUniforms.color5];
     $("#gradient").gradient("setUpdateCallback", onUpdatedColor);
-    
+
     mGSMaterial = new THREE.ShaderMaterial({
             uniforms: mUniforms,
             vertexShader: document.getElementById('standardVertexShader').textContent,
@@ -137,33 +134,32 @@ init = function()
                 vertexShader: document.getElementById('standardVertexShader').textContent,
                 fragmentShader: document.getElementById('screenFragmentShader').textContent,
             });
-    
+
     var plane = new THREE.PlaneGeometry(1.0, 1.0);
     mScreenQuad = new THREE.Mesh(plane, mScreenMaterial);
     mScene.add(mScreenQuad);
-    
+
     mColorsNeedUpdate = true;
-    
+
     resize(canvas.clientWidth, canvas.clientHeight);
-    
+
     render(0);
     mUniforms.brush.value = new THREE.Vector2(0.5, 0.5);
     mLastTime = new Date().getTime();
     requestAnimationFrame(render);
 }
 
-var resize = function(width, height)
-{
+var resize = function(width, height) {
     // Set the new shape of canvas.
     canvasQ.width(width);
     canvasQ.height(height);
-    
+
     // Get the real size of canvas.
     canvasWidth = canvasQ.width();
     canvasHeight = canvasQ.height();
-    
+
     mRenderer.setSize(canvasWidth, canvasHeight);
-    
+
     // TODO: Possible memory leak?
     mTexture1 = new THREE.WebGLRenderTarget(canvasWidth/2, canvasHeight/2,
                         {minFilter: THREE.LinearFilter,
@@ -179,119 +175,107 @@ var resize = function(width, height)
     mTexture1.wrapT = THREE.RepeatWrapping;
     mTexture2.wrapS = THREE.RepeatWrapping;
     mTexture2.wrapT = THREE.RepeatWrapping;
-    
+
     mUniforms.screenWidth.value = canvasWidth/2;
     mUniforms.screenHeight.value = canvasHeight/2;
 }
 
-var render = function(time)
-{
+var render = function(time) {
     var dt = (time - mLastTime)/20.0;
     if(dt > 0.8 || dt<=0)
         dt = 0.8;
     mLastTime = time;
-    
+
     mScreenQuad.material = mGSMaterial;
     mUniforms.delta.value = dt;
     mUniforms.feed.value = feed;
     mUniforms.kill.value = kill;
-    
-    for(var i=0; i<8; ++i)
-    {
-        if(!mToggled)
-        {
+
+    for (var i=0; i<8; ++i) {
+        if (!mToggled) {
             mUniforms.tSource.value = mTexture1;
             mRenderer.render(mScene, mCamera, mTexture2, true);
             mUniforms.tSource.value = mTexture2;
         }
-        else
-        {
+        else {
             mUniforms.tSource.value = mTexture2;
             mRenderer.render(mScene, mCamera, mTexture1, true);
             mUniforms.tSource.value = mTexture1;
         }
-        
+
         mToggled = !mToggled;
         mUniforms.brush.value = mMinusOnes;
     }
-    
+
     if(mColorsNeedUpdate)
         updateUniformsColors();
-    
+
     mScreenQuad.material = mScreenMaterial;
     mRenderer.render(mScene, mCamera);
-    
+
     requestAnimationFrame(render);
 }
 
-loadPreset = function(idx)
-{
+loadPreset = function(idx) {
     feed = presets[idx].feed;
     kill = presets[idx].kill;
     worldToForm();
 }
 
-var updateUniformsColors = function()
-{
+var updateUniformsColors = function() {
     var values = $("#gradient").gradient("getValuesRGBS");
-    for(var i=0; i<values.length; i++)
-    {
+    for (var i=0; i<values.length; i++) {
         var v = values[i];
         mColors[i].value = new THREE.Vector4(v[0], v[1], v[2], v[3]);
     }
-    
+
     mColorsNeedUpdate = false;
 }
 
-var onUpdatedColor = function()
-{
+var onUpdatedColor = function() {
     mColorsNeedUpdate = true;
     updateShareString();
 }
 
-var onMouseMove = function(e)
-{
+var onMouseMove = function(e) {
     var ev = e ? e : window.event;
-    
+
     mMouseX = ev.pageX - canvasQ.offset().left; // these offsets work with
     mMouseY = ev.pageY - canvasQ.offset().top; //  scrolled documents too
-    
-    if(mMouseDown)
+
+    if(mMouseDown)  {
         mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
+    }
 }
 
-var onMouseDown = function(e)
-{
+var onMouseDown = function(e) {
     var ev = e ? e : window.event;
     mMouseDown = true;
-    
+
     mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
 }
 
-var onMouseUp = function(e)
-{
+var onMouseUp = function(e) {
     mMouseDown = false;
 }
 
-clean = function()
-{
+clean = function() {
     mUniforms.brush.value = new THREE.Vector2(-10, -10);
 }
 
-snapshot = function()
-{
+snapshot = function() {
     var dataURL = canvas.toDataURL("image/png");
     window.open(dataURL, "name-"+Math.random());
 }
 
-// resize canvas to fullscreen, scroll to upper left 
+// resize canvas to fullscreen, scroll to upper left
 // corner and try to enable fullscreen mode and vice-versa
 fullscreen = function() {
 
     var canv = $('#myCanvas');
     var elem = canv.get(0);
-    
-    if(isFullscreen())
+
+    if (isFullscreen())
     {
         // end fullscreen
         if (elem.cancelFullscreen) {
@@ -302,22 +286,22 @@ fullscreen = function() {
             document.webkitCancelFullScreen();
         }
     }
-    
+
     if(!isFullscreen())
     {
         // save current dimensions as old
         window.oldCanvSize = {
-            width : canv.width(), 
+            width : canv.width(),
             height: canv.height()
         };
-        
+
         // adjust canvas to screen size
         resize(screen.width, screen.height);
-        
+
         // scroll to upper left corner
         $('html, body').scrollTop(canv.offset().top);
         $('html, body').scrollLeft(canv.offset().left);
-        
+
         // request fullscreen in different flavours
         if (elem.requestFullscreen) {
             elem.requestFullscreen();
@@ -329,8 +313,7 @@ fullscreen = function() {
     }
 }
 
-var isFullscreen = function()
-{
+var isFullscreen = function() {
     return document.mozFullScreenElement ||
         document.webkitCurrentFullScreenElement ||
         document.fullscreenElement;
@@ -342,15 +325,13 @@ $(document).bind('webkitfullscreenchange mozfullscreenchange fullscreenchange', 
         resize(window.oldCanvSize.width, window.oldCanvSize.height);
 });
 
-var worldToForm = function()
-{
+var worldToForm = function() {
     //document.ex.sldReplenishment.value = feed * 1000;
     $("#sld_replenishment").slider("value", feed);
     $("#sld_diminishment").slider("value", kill);
 }
 
-var init_controls = function()
-{
+var init_controls = function() {
     $("#sld_replenishment").slider({
         value: feed, min: 0, max:0.1, step:0.001,
         change: function(event, ui) {$("#replenishment").html(ui.value); feed = ui.value; updateShareString();},
@@ -363,14 +344,14 @@ var init_controls = function()
         slide: function(event, ui) {$("#diminishment").html(ui.value); kill = ui.value; updateShareString();}
     });
     $("#sld_diminishment").slider("value", kill);
-    
+
     $('#share').keypress(function (e) {
         if (e.which == 13) {
             parseShareString();
             return false;
         }
     });
-    
+
     $("#btn_clear").button({
         icons : {primary : "ui-icon-document"},
         text : false
@@ -383,7 +364,7 @@ var init_controls = function()
         icons : {primary : "ui-icon-arrow-4-diag"},
         text : false
     });
-    
+
     $("#notworking").click(function(){
         $("#requirement_dialog").dialog("open");
     });
@@ -392,66 +373,57 @@ var init_controls = function()
     });
 }
 
-alertInvalidShareString = function()
-{
+alertInvalidShareString = function() {
     $("#share").val("Invalid string!");
     setTimeout(updateShareString, 1000);
 }
 
-parseShareString = function()
-{
+parseShareString = function() {
     var str = $("#share").val();
     var fields = str.split(",");
-    
-    if(fields.length != 12)
-    {
+
+    if(fields.length != 12) {
         alertInvalidShareString();
         return;
     }
-    
+
     var newFeed = parseFloat(fields[0]);
     var newKill = parseFloat(fields[1]);
-    
-    if(isNaN(newFeed) || isNaN(newKill))
-    {
+
+    if(isNaN(newFeed) || isNaN(newKill)) {
         alertInvalidShareString();
         return;
     }
-    
+
     var newValues = [];
-    for(var i=0; i<5; i++)
-    {
+    for (var i=0; i<5; i++) {
         var v = [parseFloat(fields[2+2*i]), fields[2+2*i+1]];
-        
-        if(isNaN(v[0]))
-        {
+
+        if (isNaN(v[0])) {
             alertInvalidShareString();
             return;
         }
-        
+
         // Check if the string is a valid color.
-        if(! /^#[0-9A-F]{6}$/i.test(v[1]))
-        {
+        if (! /^#[0-9A-F]{6}$/i.test(v[1])) {
             alertInvalidShareString();
             return;
         }
-        
+
         newValues.push(v);
     }
-    
+
     $("#gradient").gradient("setValues", newValues);
     feed = newFeed;
     kill = newKill;
     worldToForm();
 }
 
-updateShareString = function()
-{
+updateShareString = function() {
     var str = "".concat(feed, ",", kill);
-    
+
     var values = $("#gradient").gradient("getValues");
-    for(var i=0; i<values.length; i++)
-    {
+    for(var i=0; i<values.length; i++) {
         var v = values[i];
         str += "".concat(",", v[0], ",", v[1]);
     }
