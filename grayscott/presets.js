@@ -3,6 +3,9 @@
  */
 var grayScott = (function(module){
 
+    /** number of sub-steps per frame.  If larger, then more computation per frame  */
+    var DEFAULT_NUM_STEPS_PER_FRAME = 10;
+
     var PRESETS = [
         {   name: "Default",
             feed: 0.037,
@@ -60,7 +63,9 @@ var grayScott = (function(module){
     }
 
     module.getPreset = function(i) {
-        return $.extend({}, PRESETS[i]);
+        var p = $.extend({}, PRESETS[i]);
+        p.numStepsPerFrame = DEFAULT_NUM_STEPS_PER_FRAME;
+        return p;
     }
 
     module.getPresetNames = function() {

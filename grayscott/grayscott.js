@@ -37,7 +37,7 @@ var grayScott = (function(module){
     /** initialization of grayScott module */
     module.init = function() {
         preset = module.getDefaultPreset();
-        init_controls();
+        initControls();
         createFullScreenBinding();
 
         canvasQ = $('#myCanvas');
@@ -204,8 +204,7 @@ var grayScott = (function(module){
         mUniforms.feed.value = preset.feed;
         mUniforms.kill.value = preset.kill;
 
-        var numSubSteps = 80;  // if larger, then more computation per frame
-        for (var i = 0; i < numSubSteps; ++i) {
+        for (var i = 0; i < preset.numStepsPerFrame; ++i) {
             if (!mToggled) {
                 mUniforms.tSource.value = mTexture1;
                 mRenderer.render(mScene, mCamera, mTexture2, true);
@@ -294,12 +293,12 @@ var grayScott = (function(module){
     }
 
     var worldToForm = function() {
-        //document.ex.sldReplenishment.value = feed * 1000;
         $("#sld_replenishment").slider("value", preset.feed);
         $("#sld_diminishment").slider("value", preset.kill);
+        $("#sld_numStepsPerFrame").slider("value", preset.numStepsPerFrame);
     }
 
-    var init_controls = function() {
+    var initControls = function() {
         initPresetDropDown();
         $("#sld_replenishment").slider({
             value: preset.feed, min: 0, max:0.1, step:0.001,
@@ -307,12 +306,20 @@ var grayScott = (function(module){
             slide: function(event, ui) {$("#replenishment").html(ui.value); preset.feed = ui.value; updateShareString();}
         });
         $("#sld_replenishment").slider("value", preset.feed);
+
         $("#sld_diminishment").slider({
             value: preset.kill, min: 0, max:0.073, step:0.001,
             change: function(event, ui) {$("#diminishment").html(ui.value); preset.kill = ui.value; updateShareString();},
             slide: function(event, ui) {$("#diminishment").html(ui.value); preset.kill = ui.value; updateShareString();}
         });
         $("#sld_diminishment").slider("value", preset.kill);
+
+        $("#sld_numStepsPerFrame").slider({
+            value: preset.numStepsPerFrame, min: 1, max:500, step:1,
+            change: function(event, ui) {$("#numStepsPerFrame").html(ui.value); preset.numStepsPerFrame = ui.value; updateShareString();},
+            slide: function(event, ui) {$("#numStepsPerFrame").html(ui.value); preset.numStepsPerFrame = ui.value; updateShareString();}
+        });
+        $("#sld_numStepsPerFrame").slider("value", preset.numStepsPerFrame);
 
         $('#share').keypress(function (e) {
             if (e.which == 13) {
