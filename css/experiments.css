@@ -7,6 +7,10 @@ body {
     margin: 0 auto;
 }
 
+h1 {
+  text-align: center;
+}
+
 header, footer, aside, nav {
     display: block;
 }
@@ -17,9 +21,9 @@ a:hover {color:#999999;}
 a:active {color:#ffffff;}
 
 footer {
-    font-size:8pt;
-    text-align:center;
-    margin-top:10px;
+    font-size: 8pt;
+    text-align: center;
+    margin-top: 10px;
 }
 
 footer span {
@@ -43,6 +47,8 @@ footer span {
 
 #simulation .viewer {
     display:table-cell;
+    width: 1000px;
+    height: 400px;
 }
 
 #simulation .panel {

@@ -90,6 +90,7 @@ var grayScott = (function(module){
 
         mColorsNeedUpdate = true;
 
+        window.addEventListener('resize', resize, false);
         resize(canvas.clientWidth, canvas.clientHeight);
 
         render(0);
@@ -149,6 +150,10 @@ var grayScott = (function(module){
         }
     }
 
+    module.clean = function() {
+        mUniforms.brush.value = new THREE.Vector2(-10, -10);
+    }
+
     /**
      * Sample and show the frames per second every 3 seconds or so.
      */
@@ -165,6 +170,10 @@ var grayScott = (function(module){
 
     var resize = function(width, height) {
         // Set the new shape of canvas.
+        if (!isFullscreen()) {
+            height = window.innerHeight - 120;
+        }
+
         canvasQ.width(width);
         canvasQ.height(height);
 
@@ -190,8 +199,8 @@ var grayScott = (function(module){
         mTexture2.wrapS = THREE.RepeatWrapping;
         mTexture2.wrapT = THREE.RepeatWrapping;
 
-        mUniforms.screenWidth.value = canvasWidth/2;
-        mUniforms.screenHeight.value = canvasHeight/2;
+        mUniforms.screenWidth.value = canvasWidth / 2;
+        mUniforms.screenHeight.value = canvasHeight / 2;
     }
 
     /** passed to requestAnimationFrame to do the rendering */
@@ -260,8 +269,8 @@ var grayScott = (function(module){
         mMouseX = ev.pageX - canvasQ.offset().left; // these offsets work with
         mMouseY = ev.pageY - canvasQ.offset().top; //  scrolled documents too
 
-        if(mMouseDown)  {
-            mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
+        if (mMouseDown)  {
+            mUniforms.brush.value = new THREE.Vector2(mMouseX / canvasWidth, 1 - mMouseY / canvasHeight);
         }
     }
 
@@ -269,15 +278,11 @@ var grayScott = (function(module){
         var ev = e ? e : window.event;
         mMouseDown = true;
 
-        mUniforms.brush.value = new THREE.Vector2(mMouseX/canvasWidth, 1-mMouseY/canvasHeight);
+        mUniforms.brush.value = new THREE.Vector2(mMouseX / canvasWidth, 1 - mMouseY / canvasHeight);
     }
 
     var onMouseUp = function(e) {
         mMouseDown = false;
-    }
-
-    var clean = function() {
-        mUniforms.brush.value = new THREE.Vector2(-10, -10);
     }
 
     var snapshot = function() {
@@ -303,7 +308,10 @@ var grayScott = (function(module){
     var worldToForm = function() {
         $("#sld_replenishment").slider("value", preset.feed);
         $("#sld_diminishment").slider("value", preset.kill);
+        // should the sliders update when the preset is changed? probably
         $("#sld_numStepsPerFrame").slider("value", preset.numStepsPerFrame);
+        $("#sld_DU").slider("value", preset.DU);
+        $("#sld_DV").slider("value", preset.DV);
     }
 
     var addSlider = function(name, presetKey, min, max, step) {
@@ -325,8 +333,8 @@ var grayScott = (function(module){
 
         addSlider("replenishment", "feed", 0, 0.1, 0.001);
         addSlider("diminishment", "kill", 0, 0.073, 0.001);
-        addSlider("DU", "DU", 0.001, 0.2, 0.001);
-        addSlider("DV", "DV", 0.001, 0.1, 0.001);
+        addSlider("DU", "DU", 0.001, 0.4, 0.001);
+        addSlider("DV", "DV", 0.001, 0.4, 0.001);
         addSlider("numStepsPerFrame", "numStepsPerFrame", 1, 400, 1);
 
         $('#share').keypress(function (e) {
