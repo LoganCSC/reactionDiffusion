@@ -37,34 +37,33 @@ a:active {color:#ffffff;}
     box-shadow: 10px 10px 7px #222;
 }
 
-    #simulation .viewer {
-        display:table-cell;
-    }
-    
-    #simulation .panel {
-        display:table-cell;
-        vertical-align:top;
-        width: 200px;
-        padding: 0px 5px 0px 5px;
-        font-size: 9pt;
-        background:#151515;
-    }
-        #simulation .panel header {
-            color: #ffffff;
-        }
-        
-    	#simulation .panel .slider {
-    		margin: 7px 10px 10px 10px;
-    	}
-        #simulation .panel section {
-            margin-bottom: 15px;
-            border-bottom: 1px dotted;
-        }
-        #simulation .panel section:last-child {
-            margin-bottom: 0px;
-            border-bottom: 0px;
-        }
+#simulation .viewer {
+    display:table-cell;
+}
 
+#simulation .panel {
+    display:table-cell;
+    vertical-align:top;
+    width: 200px;
+    padding: 0px 5px 0px 5px;
+    font-size: 9pt;
+    background:#151515;
+}
+#simulation .panel header {
+    color: #ffffff;
+}
+
+#simulation .panel .slider {
+    margin: 7px 10px 10px 10px;
+}
+#simulation .panel section {
+    margin-bottom: 15px;
+    border-bottom: 1px dotted;
+}
+#simulation .panel section:last-child {
+    margin-bottom: 0px;
+    border-bottom: 0px;
+}
 
 #myCanvas {
     display:block;

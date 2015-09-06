@@ -1,16 +1,8 @@
-======================
-JavaScript Experiments
-======================
-
-Some JavaScript experiments. You can see them online using the links below.
-`Google Chrome <https://www.google.com/chrome>`_ is the best browser
-for these demos, but `Opera <http://www.opera.com>`_ or
-Firefox should be fine too.
 
 `Gray-Scott <http://pmneila.github.com/jsexp/grayscott/>`_
 ==========================================================
 
-`Gray-Scott <http://pmneila.github.com/jsexp/grayscott/>`_
+`Gray-Scott <https://github.com/LoganCSC/reactionDiffusion/tree/master/grayscott>`_
 is a solver for the Gray-Scott reaction-diffusion model. Roughly, this
 can be seen as a simulation of the behavior of diffusive living beings reproducing
 under conditions of limited food. Very different patterns emerge for
@@ -70,14 +62,3 @@ Some screenshots of the application.
 
 .. image:: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/wormsx_s.png
   :target: https://github.com/pmneila/jsexp/raw/master/grayscott/snapshots/wormsx.png
-
-
-`Particles <http://pmneila.github.com/jsexp/massspring/>`_
-=========================================================
-
-`Particles <http://pmneila.github.com/jsexp/massspring/>`_
-is a simple mass-spring physics simulation.
-
-.. image:: https://github.com/pmneila/jsexp/raw/master/massspring/particles.png
-   :align: center
-   :target: http://pmneila.github.com/jsexp/massspring
