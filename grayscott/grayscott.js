@@ -31,6 +31,9 @@ var grayScott = (function(module){
     var mMinusOnes = new THREE.Vector2(-1, -1);
     var preset; // parameter configuration
 
+    var startTime;
+    var numFrames = 0;
+
     /** initialization of grayScott module */
     module.init = function() {
         preset = module.getDefaultPreset();
@@ -90,6 +93,8 @@ var grayScott = (function(module){
         render(0);
         mUniforms.brush.value = new THREE.Vector2(0.5, 0.5);
         mLastTime = new Date().getTime();
+        startTime = mLastTime;
+        measureFPS();
         requestAnimationFrame(render);
     }
 
@@ -142,6 +147,20 @@ var grayScott = (function(module){
         }
     }
 
+    /**
+     * Sample and show the frames per second every 3 seconds or so.
+     */
+    var measureFPS = function() {
+        setInterval(function () {
+            var currentTime = new Date().getTime();
+            var numSeconds = (currentTime - startTime) / 1000.0;
+            var fps = numFrames / numSeconds;
+            $("#fps").text("FPS: " + fps.toFixed(1));
+            startTime = currentTime;
+            numFrames = 0;
+        }, 2000);
+    }
+
     var resize = function(width, height) {
         // Set the new shape of canvas.
         canvasQ.width(width);
@@ -173,8 +192,9 @@ var grayScott = (function(module){
         mUniforms.screenHeight.value = canvasHeight/2;
     }
 
+    /** passed to requestAnimationFrame to do the rendering */
     var render = function(time) {
-        var dt = (time - mLastTime)/20.0;
+        var dt = (time - mLastTime) / 20.0;
         if(dt > 0.8 || dt<=0)
             dt = 0.8;
         mLastTime = time;
@@ -184,7 +204,8 @@ var grayScott = (function(module){
         mUniforms.feed.value = preset.feed;
         mUniforms.kill.value = preset.kill;
 
-        for (var i=0; i<8; ++i) {
+        var numSubSteps = 80;  // if larger, then more computation per frame
+        for (var i = 0; i < numSubSteps; ++i) {
             if (!mToggled) {
                 mUniforms.tSource.value = mTexture1;
                 mRenderer.render(mScene, mCamera, mTexture2, true);
@@ -200,11 +221,13 @@ var grayScott = (function(module){
             mUniforms.brush.value = mMinusOnes;
         }
 
-        if(mColorsNeedUpdate)
+        if (mColorsNeedUpdate)  {
             updateUniformsColors();
+        }
 
         mScreenQuad.material = mScreenMaterial;
         mRenderer.render(mScene, mCamera);
+        numFrames++;
 
         requestAnimationFrame(render);
     }

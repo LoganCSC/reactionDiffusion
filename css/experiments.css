@@ -16,10 +16,14 @@ a:visited {color:#777777;}
 a:hover {color:#999999;}
 a:active {color:#ffffff;}
 
-#copyright {
+footer {
     font-size:8pt;
     text-align:center;
     margin-top:10px;
+}
+
+footer span {
+    padding-right: 20px;
 }
 
 .remark {

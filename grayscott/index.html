@@ -90,31 +90,30 @@
 
             void main() {
                 float value = texture2D(tSource, vUv).g;
-                // int step = int(floor(value));
-                // float a = fract(value);
-                float a;
+                // float fraction = fract(value);
+                float fraction;
                 vec3 col;
 
                 if (value <= color1.a) {
                     col = color1.rgb;
                 }
-                if (value > color1.a && value <= color2.a) {
-                    a = (value - color1.a)/(color2.a - color1.a);
-                    col = mix(color1.rgb, color2.rgb, a);
+                else if (value > color1.a && value <= color2.a) {
+                    fraction = (value - color1.a) / (color2.a - color1.a);
+                    col = mix(color1.rgb, color2.rgb, fraction);
                 }
-                if (value > color2.a && value <= color3.a) {
-                    a = (value - color2.a)/(color3.a - color2.a);
-                    col = mix(color2.rgb, color3.rgb, a);
+                else if (value > color2.a && value <= color3.a) {
+                    fraction = (value - color2.a) / (color3.a - color2.a);
+                    col = mix(color2.rgb, color3.rgb, fraction);
                 }
-                if (value > color3.a && value <= color4.a) {
-                    a = (value - color3.a)/(color4.a - color3.a);
-                    col = mix(color3.rgb, color4.rgb, a);
+                else if (value > color3.a && value <= color4.a) {
+                    fraction = (value - color3.a) / (color4.a - color3.a);
+                    col = mix(color3.rgb, color4.rgb, fraction);
                 }
-                if (value > color4.a && value <= color5.a) {
-                    a = (value - color4.a)/(color5.a - color4.a);
-                    col = mix(color4.rgb, color5.rgb, a);
+                else if (value > color4.a && value <= color5.a) {
+                    fraction = (value - color4.a) / (color5.a - color4.a);
+                    col = mix(color4.rgb, color5.rgb, fraction);
                 }
-                if (value > color5.a) {
+                else if (value > color5.a) {
                     col = color5.rgb;
                 }
 
@@ -191,12 +190,11 @@
         </aside>
         </div>
         <footer>
-            <div id="copyright">
-                &copy;2012
-                <a href="https://twitter.com/pmneila">@pmneila</a>
+            <span id="fps"></span>
+            <span id="copyright">
                 <a href="https://github.com/pmneila/jsexp">Github</a>
                 <a id="notworking" href="#">Not working?</a>
-            </div>
+            </span>
         </footer>
 
         <div id="requirement_dialog" title="Requirements">
