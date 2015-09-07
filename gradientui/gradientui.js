@@ -16,7 +16,9 @@
 
     var Dragger = function(parent, position, color) {
         this.parent = parent;
-        this.parent.$this.append('<div class="gradient-dragger"></div>');
+        this.parent.$this.append('<div class="gradient-dragger">'
+            + '<span class="gradient-dragger-inner">&#9650</span>'
+            + '</div>');
         this.$this = parent.$this.children('.gradient-dragger:last');
         this.width = parent.$this.children('.gradient-view').width() - 7;
         this.position = position;
@@ -35,10 +37,15 @@
     }
 
     Dragger.prototype.click = function(event)  {
-        if (this.moved)
+        if (this.moved)  {
             return;
+        }
 
         var aux = this;
+        if ($(event.target).hasClass("gradient-dragger-inner")) {
+            event.target = $(event.target).parent()[0];
+        }
+
         colorPicker.exportColor = function() {
             aux.color = '#' + colorPicker.CP.hex;
             aux.$this.css("background-color", aux.color);
@@ -79,7 +86,7 @@
 
     Dragger.prototype.setPosition = function(pos) {
         pos = clamp(pos, 0.0, 1.0);
-        var newleft = pos*this.width;
+        var newleft = pos * this.width;
 
         this.$this.css("left", newleft);
         this.position = pos;
@@ -126,7 +133,7 @@
 
         this.values = aux;
 
-        if(this.callback !== undefined) {
+        if (this.callback !== undefined) {
             this.callback.fn(this.callback.data);
         }
     }
@@ -145,7 +152,7 @@
         var values = this.values;
 
         var lingrad = this.ctx.createLinearGradient(0, 0, this.canvas.width, 0);
-        for(var i=0; i<values.length; i++)
+        for (var i=0; i<values.length; i++)
             lingrad.addColorStop(values[i][0], values[i][1]);
 
         this.ctx.fillStyle = lingrad;
